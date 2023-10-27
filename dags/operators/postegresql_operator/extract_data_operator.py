@@ -20,7 +20,6 @@ class QueryPostgres(BaseOperator):
 
     def execute(self, context):
         postgres_hook = PostgresHook(postgres_conn_id="postgres_homero")
-        print(f"Timestamp: {self.last_extraction_timestamp}")
 
         sql_query = f"""
                     SELECT {self.attributes}

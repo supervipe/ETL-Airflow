@@ -24,13 +24,9 @@ class LoadMongo(BaseOperator):
         data_dict = json.loads(data_json)
 
         for data in data_dict:
-            # Assuming you have a unique identifier field like "_id"
             unique_id = data.get("_id")
-
-            # Create a filter for finding the existing document
             filter_query = {"_id": unique_id}
 
-            # Try to update an existing document, or insert a new one if it doesn't exist
             result = conn[database_name][collection_name].update_one(
                 filter_query, {"$set": data}, upsert=True
             )
