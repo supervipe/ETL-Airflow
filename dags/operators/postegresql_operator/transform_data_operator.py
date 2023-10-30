@@ -22,8 +22,8 @@ class TransformPostgresOperator(BaseOperator):
 
         for data in join_data[1]:
             for transformed in transformed_data:
-                if data["user_id"] == transformed["_id"]:
-                    transformed["course_id"] = data["course_id"]
+                if data["purchaseId"] == transformed["_id"]:
+                    transformed["rating"] = data["rating"]
                     print(f"Data transformed: {transformed}")
 
         return transformed_data

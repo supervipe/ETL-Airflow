@@ -19,7 +19,7 @@ class QueryPostgres(BaseOperator):
         self.attributes = attributes
 
     def execute(self, context):
-        postgres_hook = PostgresHook(postgres_conn_id="postgres_homero")
+        postgres_hook = PostgresHook(postgres_conn_id="postgres_recommendation")
 
         sql_query = f"""
                     SELECT {self.attributes}

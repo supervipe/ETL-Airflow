@@ -9,7 +9,7 @@ from operators.postegresql_operator.transform_data_operator import (
 from operators.load_data.load_data_mongodb import LoadMongo
 
 
-class CreateDagPostgres:
+class ProcessDataPurchase:
     @staticmethod
     def create_dag(dag_id):
         last_extraction_timestamp = Variable.get(
@@ -19,21 +19,21 @@ class CreateDagPostgres:
 
         dag_created = DAG(dag_id, default_args=default_dag_args)
 
-        user_attributes = "id, name, login, role, birth_date, created_at, updatedAt"
-        course_student_attributes = "id, course_id, user_id"
+        purchase_attributes = "id, userId, productId, price, timestamp"
+        feedback_attributes = "id, purchaseId, rating"
 
-        task_get_data_users = QueryPostgres(
-            task_id="extract_data_users_postgres",
-            table="users",
-            attributes=user_attributes,
+        task_get_data_purchase = QueryPostgres(
+            task_id="extract_data_purchase_postgres",
+            table="purchase",
+            attributes=purchase_attributes,
             last_extraction_timestamp=last_extraction_timestamp,
             dag=dag_created,
         )
 
-        task_get_data_course = QueryPostgres(
-            task_id="extract_data_course_postgres",
-            table="course_student",
-            attributes=course_student_attributes,
+        task_get_data_feedback = QueryPostgres(
+            task_id="extract_data_feedback_postgres",
+            table="feedback",
+            attributes=feedback_attributes,
             last_extraction_timestamp=last_extraction_timestamp,
             dag=dag_created,
         )
@@ -50,20 +50,20 @@ class CreateDagPostgres:
         task_transform_data = TransformPostgresOperator(
             task_id="transform_data_postgres",
             dependent_tasks_ids=[
-                "extract_data_users_postgres",
-                "extract_data_course_postgres",
+                "extract_data_purchase_postgres",
+                "extract_data_feedback_postgres",
             ],
             dag=dag_created,
         )
 
         task_load_data = LoadMongo(
-            task_id="load_data_mongodb",
+            task_id="load_data_csv",
             dependent_tasks_ids=["transform_data_postgres"],
             dag=dag_created,
         )
 
         (
-            [task_get_data_users, task_get_data_course]
+            [task_get_data_purchase, task_get_data_feedback]
             >> task_update_time
             >> task_transform_data
             >> task_load_data
@@ -75,13 +75,11 @@ class CreateDagPostgres:
 
 default_dag_args = {
     "owner": "airflow",
-    "job_name": "Connect_postgres",
+    "job_name": "Process data to MongoDB",
     "retries": "0",
     "start_date": datetime.now(),
     "email": ["youremail@gmail.com"],
     "schedule_interval": "1 * * *",
 }
 
-dag = CreateDagPostgres.create_dag("dag_postgres")
-
-Variable.set("last_execution_time", str(dag.start_date))
+dag = ProcessDataPurchase.create_dag("dag_purchase")

@@ -19,7 +19,7 @@ class LoadMongo(BaseOperator):
 
         conn = mongo_hook.get_conn()
         database_name = "datalake-mongodb"
-        collection_name = "users"
+        collection_name = "purchase_feedback"
         data_json = json.dumps(transformed_data, default=str)
         data_dict = json.loads(data_json)
 
